@@ -12,7 +12,7 @@ module.exports = {
         if (!interaction.member.voice.channel) {
             return interaction.reply({ 
                 content: '❌ Vous devez être dans un canal vocal pour utiliser cette commande !', 
-                ephemeral: true 
+                flags: 64 // MessageFlags.Ephemeral 
             });
         }
 

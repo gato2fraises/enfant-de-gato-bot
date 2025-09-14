@@ -19,14 +19,14 @@ module.exports = {
         if (!guild) {
             return interaction.reply({ 
                 content: '❌ Cette commande ne peut être utilisée que dans un serveur !', 
-                ephemeral: true 
+                flags: 64 // MessageFlags.Ephemeral 
             });
         }
 
         const reason = interaction.options.getString('raison') || 'Support général';
 
         // Différer la réponse car l'opération peut prendre du temps
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: 64 }); // MessageFlags.Ephemeral
 
         try {
             // Créer le ticket

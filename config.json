@@ -2,6 +2,7 @@
   "prefix": "!",
   "color": "#00ff00",
   "embedFooter": "Mon Bot Discord",
+  "updateChannelId": "1416847394058014890",
   "presence": {
     "activity": "Surveiller le serveur",
     "status": "online",

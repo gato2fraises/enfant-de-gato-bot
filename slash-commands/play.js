@@ -16,23 +16,22 @@ module.exports = {
         if (!interaction.member.voice.channel) {
             return interaction.reply({ 
                 content: '❌ Vous devez être dans un canal vocal pour utiliser cette commande !', 
-                ephemeral: true 
+                flags: 64 // MessageFlags.Ephemeral 
             });
         }
 
         const url = interaction.options.getString('url');
         
+        // Différer la réponse IMMÉDIATEMENT pour éviter les timeouts
+        await interaction.deferReply();
+        
         // Vérifier si c'est une URL YouTube valide
         const MusicUtils = require('../music/MusicUtils');
         if (!MusicUtils.isValidYouTubeUrl(url)) {
-            return interaction.reply({ 
-                content: '❌ Veuillez fournir un lien YouTube valide !', 
-                ephemeral: true 
+            return interaction.editReply({ 
+                content: '❌ Veuillez fournir un lien YouTube valide !' 
             });
         }
-
-        // Différer la réponse car l'opération peut prendre du temps
-        await interaction.deferReply();
 
         // Vérifier à nouveau si l'utilisateur est toujours dans un canal vocal
         const voiceChannel = interaction.member.voice.channel;

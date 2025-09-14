@@ -27,7 +27,7 @@ module.exports = {
         if (!interaction.member.permissions.has(PermissionFlagsBits.BanMembers)) {
             return interaction.reply({ 
                 content: '❌ Vous n\'avez pas la permission de bannir des utilisateurs !', 
-                ephemeral: true 
+                flags: 64 // MessageFlags.Ephemeral 
             });
         }
 
@@ -39,7 +39,7 @@ module.exports = {
         if (targetUser.id === interaction.user.id) {
             return interaction.reply({ 
                 content: '❌ Vous ne pouvez pas vous bannir vous-même !', 
-                ephemeral: true 
+                flags: 64 // MessageFlags.Ephemeral 
             });
         }
 
@@ -47,7 +47,7 @@ module.exports = {
         if (targetUser.id === interaction.client.user.id) {
             return interaction.reply({ 
                 content: '❌ Vous ne pouvez pas me bannir !', 
-                ephemeral: true 
+                flags: 64 // MessageFlags.Ephemeral 
             });
         }
 

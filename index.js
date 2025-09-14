@@ -9,6 +9,8 @@ const config = require('./config.json');
 // Importation des gestionnaires
 const MusicManager = require('./music/MusicManager');
 const TicketManager = require('./tickets/TicketManager');
+const UpdateNotifier = require('./utils/UpdateNotifier');
+const ActivityLogger = require('./utils/ActivityLogger');
 
 // Création du client Discord avec les intents nécessaires
 const client = new Client({
@@ -28,6 +30,8 @@ client.slashCommands = new Collection();
 // Initialisation des gestionnaires
 client.musicManager = new MusicManager();
 client.ticketManager = new TicketManager();
+client.updateNotifier = new UpdateNotifier(client);
+client.activityLogger = new ActivityLogger();
 
 // Fonction pour charger les commandes
 function loadCommands() {
@@ -87,7 +91,7 @@ function loadSlashCommands() {
 }
 
 // Événement : Bot prêt
-client.once('ready', () => {
+client.once('ready', async () => {
     console.log(`🚀 ${client.user.tag} est en ligne !`);
     console.log(`📊 Serveurs: ${client.guilds.cache.size}`);
     console.log(`👥 Utilisateurs: ${client.users.cache.size}`);
@@ -101,12 +105,18 @@ client.once('ready', () => {
     // Charger les commandes
     loadCommands();
     loadSlashCommands();
+    
+    // Envoyer notification de démarrage
+    await client.updateNotifier.sendStartupNotification();
 });
 
 // Événement : Bot rejoint un nouveau serveur
-client.on('guildCreate', guild => {
+client.on('guildCreate', async guild => {
     console.log(`🆕 Bot ajouté au serveur: ${guild.name} (ID: ${guild.id})`);
     console.log(`👥 Membres: ${guild.memberCount}`);
+    
+    // Envoyer notification de nouveau serveur
+    await client.updateNotifier.sendNewGuildNotification(guild);
     
     // Trouver un canal pour envoyer un message de présentation
     const channel = guild.channels.cache.find(channel => 
@@ -189,24 +199,33 @@ client.on('interactionCreate', async interaction => {
         console.warn(`Aucune commande slash trouvée pour ${interaction.commandName}`);
         return interaction.reply({ 
             content: '❌ Commande non trouvée !', 
-            ephemeral: true 
+            flags: 64 // MessageFlags.Ephemeral
         });
     }
 
     try {
+        // Logger l'activité
+        client.activityLogger.logCommand(interaction.commandName, interaction.user.id, interaction.guildId);
+        
         await command.execute(interaction);
     } catch (error) {
         console.error(`Erreur lors de l'exécution de la commande slash ${interaction.commandName}:`, error);
         
-        const errorMessage = {
-            content: '❌ Une erreur est survenue lors de l\'exécution de la commande !',
-            ephemeral: true
-        };
+        // Vérifier si l'interaction est encore valide avant de répondre
+        try {
+            const errorMessage = {
+                content: '❌ Une erreur est survenue lors de l\'exécution de la commande !',
+                flags: 64 // MessageFlags.Ephemeral
+            };
 
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp(errorMessage);
-        } else {
-            await interaction.reply(errorMessage);
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp(errorMessage);
+            } else {
+                await interaction.reply(errorMessage);
+            }
+        } catch (replyError) {
+            // Si on ne peut pas répondre (interaction expirée), on log juste l'erreur
+            console.error('❌ Erreur du client Discord:', replyError);
         }
     }
 });
@@ -334,6 +353,9 @@ client.on('messageCreate', async message => {
             const command = client.commands.get(commandName);
             if (command) {
                 try {
+                    // Logger l'activité pour les commandes avec préfixe
+                    client.activityLogger.logCommand(commandName, message.author.id, message.guildId);
+                    
                     await command.execute(message, args);
                 } catch (error) {
                     console.error(`Erreur lors de l'exécution de la commande ${commandName}:`, error);
@@ -345,12 +367,22 @@ client.on('messageCreate', async message => {
 });
 
 // Gestion des erreurs
-client.on('error', error => {
+client.on('error', async error => {
     console.error('❌ Erreur du client Discord:', error);
+    await client.updateNotifier.sendErrorNotification(error);
 });
 
-process.on('unhandledRejection', error => {
+process.on('unhandledRejection', async error => {
     console.error('❌ Promesse rejetée non gérée:', error);
+    await client.updateNotifier.sendErrorNotification(error);
+});
+
+// Gestion propre de l'arrêt
+process.on('SIGINT', async () => {
+    console.log('🛑 Arrêt du bot demandé...');
+    await client.updateNotifier.sendShutdownNotification();
+    client.destroy();
+    process.exit(0);
 });
 
 // Connexion du bot

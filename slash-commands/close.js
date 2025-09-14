@@ -19,7 +19,7 @@ module.exports = {
         if (!ticketManager.isTicketChannel(channel.id)) {
             return interaction.reply({ 
                 content: '❌ Cette commande ne peut être utilisée que dans un ticket !', 
-                ephemeral: true 
+                flags: 64 // MessageFlags.Ephemeral 
             });
         }
 
@@ -34,7 +34,7 @@ module.exports = {
         if (!canClose) {
             return interaction.reply({ 
                 content: '❌ Vous n\'avez pas la permission de fermer ce ticket !', 
-                ephemeral: true 
+                flags: 64 // MessageFlags.Ephemeral 
             });
         }
 

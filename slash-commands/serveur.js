@@ -11,7 +11,7 @@ module.exports = {
         if (!guild) {
             return interaction.reply({
                 content: '❌ Cette commande ne peut être utilisée qu\'dans un serveur !',
-                ephemeral: true
+                flags: 64 // MessageFlags.Ephemeral
             });
         }
         

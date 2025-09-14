@@ -1,0 +1,26 @@
+{
+  "startDate": "2025-09-14T18:24:35.095Z",
+  "commandsUsed": {
+    "ping": 1,
+    "help": 1,
+    "play": 1
+  },
+  "dailyStats": {
+    "2025-09-14": {
+      "commands": 3,
+      "users": [
+        "123456789",
+        "987654321"
+      ],
+      "guilds": [
+        "guild123",
+        "guild456"
+      ]
+    }
+  },
+  "totalCommands": 3,
+  "uniqueUsers": [
+    "123456789",
+    "987654321"
+  ]
+}

@@ -15,7 +15,7 @@ module.exports = {
             if (!queue || queue.songs.length === 0) {
                 return interaction.reply({ 
                     content: '❌ Aucune musique dans la queue !', 
-                    ephemeral: true 
+                    flags: 64 // MessageFlags.Ephemeral 
                 });
             }
 
@@ -82,7 +82,7 @@ module.exports = {
                 .setDescription('Une erreur est survenue lors de l\'affichage de la queue.')
                 .setTimestamp();
 
-            interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+            interaction.reply({ embeds: [errorEmbed], flags: 64 }); // MessageFlags.Ephemeral
         }
     }
 };
