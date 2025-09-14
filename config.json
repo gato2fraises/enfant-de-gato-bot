@@ -1,0 +1,10 @@
+{
+  "prefix": "!",
+  "color": "#00ff00",
+  "embedFooter": "Mon Bot Discord",
+  "presence": {
+    "activity": "Surveiller le serveur",
+    "status": "online",
+    "type": "WATCHING"
+  }
+}
